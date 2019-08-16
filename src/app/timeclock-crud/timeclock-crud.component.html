@@ -1,0 +1,56 @@
+<div class="container">
+    <div *ngIf="!loading; else loader">
+        <app-timeclock-navigation [date]="startDate" (changeDate)="onChangeDate($event)"></app-timeclock-navigation>
+        <form [formGroup]="daysForm" (ngSubmit)="onSubmit()">
+            <div formArrayName="days" *ngFor="let day of days.controls; let i=index">
+                <mat-card [formGroupName]="i" class="example-card" [ngClass]="{ invalid: !day.valid }">
+                    <mat-card-header>
+                        <mat-card-title>
+                            {{formatDate(day.get('date').value) | uppercase}}
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>
+                            <mat-form-field class="full-width">
+                                <mat-label>{{defaultWorkspaceLabel}}</mat-label>
+                                <mat-select formControlName="workplace_id" (selectionChange)="onChanges(i)">
+                                    <mat-option [value]="''">--brez--</mat-option>
+                                    <mat-option *ngFor="let workspace of workspaces" [value]="workspace.id">
+                                        {{workspace.name}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="day.get('workplace_id').hasError('required')">
+                                    Delovno mesto je <strong>obvezen</strong> podatek.
+                                </mat-error>
+                            </mat-form-field>
+
+
+                            <!-- <mat-form-field class="full-width">
+                                <input matInput formControlName="date" placeholder="date" readonly />
+                            </mat-form-field> -->
+
+                            <mat-form-field class="full-width">
+                                <mat-label>{{defaultHoursLabel}}</mat-label>
+                                <mat-select formControlName="hours" (selectionChange)="onChanges(i)">
+                                    <mat-option [value]="''">--brez--</mat-option>
+                                    <mat-option *ngFor="let hour of generateHours()" [value]="hour">
+                                        {{hour}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="day.get('hours').hasError('required')">
+                                    <strong>Obvezno</strong> vnesite št. ur.
+                                </mat-error>
+                            </mat-form-field>
+                        </p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+            <button mat-raised-button color="primary">Submit</button>
+        </form>
+    </div>
+
+    <ng-template #loader>
+        <mat-progress-spinner mode="indeterminate" class="loader"></mat-progress-spinner>
+    </ng-template>
+
+</div>

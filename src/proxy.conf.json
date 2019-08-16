@@ -1,0 +1,10 @@
+{
+    "/api": {
+        "target": "http://timeclock.loudandnoisy.com/api/",
+        "secure": false,
+        "pathRewrite": {
+            "^/api": ""
+          },
+          "changeOrigin": true
+    }
+}

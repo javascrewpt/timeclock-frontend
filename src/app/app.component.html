@@ -1,0 +1,15 @@
+<mat-grid-list cols="12">
+  <mat-toolbar color="primary">
+    <span>{{title}}</span>
+
+    <!-- This fills the remaining space of the current row -->
+    <span class="example-fill-remaining-space"></span>
+
+    <span *ngIf="userService.Status | async">
+        <button mat-raised-button (click)="onLogout()">Odjava</button>
+    </span>
+  </mat-toolbar>
+</mat-grid-list>
+<mat-grid-list cols="4" rowHeight="100px">
+  <router-outlet></router-outlet>
+</mat-grid-list>

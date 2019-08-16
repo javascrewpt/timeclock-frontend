@@ -1,0 +1,27 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.container>* {
+    width: 100%;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.invalid {
+    border: 1px solid red;
+    padding: 1.25em;
+}
+
+.example-card {
+    max-width: 90%;
+    margin: 1.5em auto;
+}
+
+.loader {
+    margin: 1em auto;
+    text-align: center;
+}

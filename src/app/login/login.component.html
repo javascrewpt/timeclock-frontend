@@ -1,0 +1,22 @@
+<mat-card>
+        <mat-card-title>Login</mat-card-title>
+        <mat-card-content>
+            <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+                <p>
+                    <mat-form-field>
+                        <input type="text" matInput placeholder="E-pošta" formControlName="email">
+                    </mat-form-field>
+                </p>
+                <p>
+                    <mat-form-field>
+                        <input type="password" matInput placeholder="Geslo" formControlName="password">
+                    </mat-form-field>
+                </p>
+        
+                <div class="button">
+                    <button type="submit" mat-button [disabled]="!userForm.valid">Prijavi se</button>
+                </div>
+    
+            </form>
+        </mat-card-content>
+    </mat-card>
