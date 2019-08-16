@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -37,6 +38,7 @@ import { TimeclockNavigationComponent } from './timeclock-navigation/timeclock-n
     MatCardModule,
     MatGridListModule,
     MatInputModule,
+    MatSnackBarModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
     MatFormFieldModule,
