@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnInit, SimpleChanges, OnChanges } from '@angular/core';
 import * as moment from 'moment';
 
 enum Directions {
@@ -11,7 +11,7 @@ enum Directions {
   templateUrl: './timeclock-navigation.component.html',
   styleUrls: ['./timeclock-navigation.component.css']
 })
-export class TimeclockNavigationComponent implements OnInit {
+export class TimeclockNavigationComponent implements OnInit, OnChanges {
 
   @Input() date: moment.MomentInput;
   @Output() changeDate = new EventEmitter<string>();
@@ -19,12 +19,27 @@ export class TimeclockNavigationComponent implements OnInit {
   directions = Directions;
   from: string;
   to: string;
+  outOfBounds: boolean;
 
   constructor() { }
 
   ngOnInit() {
     this.from = moment(this.date, 'YYYY MM DD').startOf('isoWeek').format('DD. MM. YYYY');
     this.to = moment(this.date, 'YYYY MM DD').format('DD. MM. YYYY');
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.checkOutOfBounds();
+  }
+
+  checkOutOfBounds() {
+    const current = moment().format('w');
+    const nextSelected = moment(this.date).add(1, 'week').format('w');
+    if (+nextSelected > +current) {
+      this.outOfBounds = true;
+    } else {
+      this.outOfBounds = false;
+    }
   }
 
   onClick(direction: string) {

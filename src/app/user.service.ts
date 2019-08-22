@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, BehaviorSubject } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { Observable, of, BehaviorSubject, Subject } from 'rxjs';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
 
 /*
   auth
@@ -12,14 +12,24 @@ dobis nazaj hash in potem ga das v header tkle
   http://timeclock.loudandnoisy.com/api/timeclock
 */
 
+interface IUser {
+  logged: boolean;
+  user: any;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private status$ = new BehaviorSubject<boolean>(localStorage.getItem('token') ? true : false);
+  // private status$ = new BehaviorSubject<any>(localStorage.getItem('token') ? { logged: true, user: {} } : { logged: false, user: null });
+  private status$ = new Subject<IUser>();
   private url = 'api';
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    if (localStorage.getItem('token')) {
+      this.getUserData().subscribe(data => console.log(data));
+    }
+  }
 
   /**
    * Handle Http operation that failed.
@@ -35,11 +45,22 @@ export class UserService {
     };
   }
 
+  getUserData(): Observable<any> {
+    return this.http.get<any>(`${this.url}/user`).pipe(
+      tap(data => this.status$.next({ logged: true, user: data }))
+    );
+  }
+
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.url}/auth/login`, { email, password }).pipe(
-      tap(data => {
-        console.log(data);
-        this.status$.next(true);
+
+      switchMap(response => {
+        if (response && response.data) {
+          localStorage.setItem('token', response.data);
+          return this.getUserData();
+        } else {
+          return of(false);
+        }
       }),
       catchError(this.handleError('login', null))
     );
@@ -47,7 +68,10 @@ export class UserService {
 
   logout(): Observable<boolean> {
     localStorage.removeItem('token');
-    this.status$.next(false);
+    this.status$.next({
+      logged: false,
+      user: null
+    });
     return of(true);
   }
 

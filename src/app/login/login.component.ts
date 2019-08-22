@@ -26,13 +26,12 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     const { email, password } = this.userForm.value;
-    this.userService.login(email, password).subscribe(response => {
-      if (response && response.data) {
-        localStorage.setItem('token', response.data);
+    this.userService.login(email, password).subscribe(success => {
+      if (success) {
         this.router.navigate(['casovnice']);
-      } else if (!response) {
+      } else {
         this.snackBar.open('Uporabniško ime ali geslo nista pravilna!', null, {
-          verticalPosition: 'top',
+          verticalPosition: 'bottom',
           duration: 3000
         });
       }

@@ -25,3 +25,11 @@
     margin: 1em auto;
     text-align: center;
 }
+
+:host /deep/ .mat-card-header-text {
+    margin: 0;
+}
+
+.mat-card-title {
+    font-size: 100%;
+}

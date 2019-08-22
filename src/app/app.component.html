@@ -4,9 +4,11 @@
 
     <!-- This fills the remaining space of the current row -->
     <span class="example-fill-remaining-space"></span>
-
-    <span *ngIf="userService.Status | async">
+    <span *ngIf="userService.Status | async as userInfo">
+      <span *ngIf="userInfo.logged">
+        Zdravo, {{userInfo.user.name}}
         <button mat-raised-button (click)="onLogout()">Odjava</button>
+      </span>
     </span>
   </mat-toolbar>
 </mat-grid-list>

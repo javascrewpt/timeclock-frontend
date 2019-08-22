@@ -7,7 +7,8 @@ import { AuthService as AuthGuard } from './auth.service';
 
 const routes: Routes = [{
   path: '',
-  component: LoginComponent
+  component: LoginComponent,
+  canActivate: [AuthGuard]
 }, {
   path: 'casovnice/:week',
   component: TimeclockCrudComponent,

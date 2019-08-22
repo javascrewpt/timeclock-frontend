@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import { catchError, tap, map, switchMap, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 moment.locale('sl');
 
@@ -19,26 +20,31 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
 
   daysForm;
   workspaces;
+
+  loading: boolean;
+  startDate: moment.Moment;
+  hours: string[] = [];
   unsubscribeSignal$: Subject<void> = new Subject();
 
-  loading;
-  startDate;
-  hours: string[] = [];
+  edit: any[] = [];
   defaultWorkspaceLabel = 'Podjetje';
   defaultHoursLabel = 'Število ur';
 
   constructor(
     private tcService: TimeclockService,
     private fb: FormBuilder,
+    private snackBar: MatSnackBar,
     private route: ActivatedRoute,
     private router: Router) { }
 
   ngOnInit() {
     this.loading = true;
 
+    // Get observables ready for combineLatest
     const workspaces$ = this.tcService.getWorkplaces().pipe(
       tap(workspaces => this.workspaces = workspaces)
     );
+
     const days$ = this.route.params.pipe(
       tap(params => {
         if (params.hasOwnProperty('week')) {
@@ -47,18 +53,21 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
             this.startDate = moment(+year, 'YYYY').week(+week).day(1);
           }
         } else {
-          this.startDate = moment(moment(new Date())).startOf('isoWeek');
+          this.startDate = moment().startOf('isoWeek');
         }
       }
       ),
       switchMap(params => params.hasOwnProperty('week') ? this.tcService.getDays(params.week) : this.tcService.getDays(null))
     );
 
+    // execute both observables
     combineLatest(workspaces$, days$).pipe(
       catchError(_ => [[], []]),
       takeUntil(this.unsubscribeSignal$)
     ).subscribe(([, currentDays]) => {
-      console.warn(currentDays);
+      // url changed, so reset temp values for edit
+      this.edit = [];
+
       this.daysForm = this.fb.group({
         days: this.fb.array(this.generateWeeks())
       });
@@ -69,6 +78,7 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
         if (exists) {
           days.push({
             ...day,
+            id: exists.id,
             workplace_id: exists.workplace_id,
             date: exists.date,
             hours: exists.hours_formated
@@ -104,11 +114,11 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
 
   private generateWeeks(): any[] {
     const days = [];
-    // const startOfWeek = moment(new Date(2019, 7, 15)).startOf('isoWeek').subtract(1, 'week');
     const startOfWeek = this.startDate;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 7; i++) {
       const current = startOfWeek.add(i === 0 ? 0 : 1, 'days');
       days.push(this.fb.group({
+        id: [null, []],
         workplace_id: ['', []],
         date: [current.format('YYYY-MM-DD'), [Validators.required]],
         hours: ['', []],
@@ -121,17 +131,15 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
     return this.daysForm.get('days') as FormArray;
   }
 
-  // todo subscribe to value changes
+  getWorkplaceName(workplaceId: number) {
+    return workplaceId ? this.workspaces.find(workplace => workplace.id === +workplaceId).name : 'NO DATA TOMMY!';
+  }
 
   onChanges(index: number): void {
     const control = (this.daysForm.get('days') as FormArray).at(index);
     const { workplace_id, hours } = control.value;
     const controlHours = control.get('hours');
     const controlWorkplace = control.get('workplace_id');
-    /*
-      controlWorkplace.hasError('required') && controlWorkplace.setValue('');
-      controlHours.hasError('required') && controlHours.setValue('');
-    */
 
     if (workplace_id !== '' && hours === '') {
       controlHours.setErrors({ required: true });
@@ -154,6 +162,28 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
     }
   }
 
+  setEdit(index: number) {
+    this.edit[index] = this.daysForm.get('days').at(index).value;
+  }
+
+  cancelEdit(index: number) {
+    this.daysForm.get('days').at(index).patchValue({ ...this.edit[index] });
+    this.edit.splice(index, 1);
+  }
+
+  saveOne(index: number) {
+    const selectedDay = this.daysForm.get('days').at(index);
+    const forDay = moment(selectedDay.value.date, 'YYYY-MM-DD').format('DD. MM. YYYY');
+    this.tcService.postDays([selectedDay.value]).pipe(
+      takeUntil(this.unsubscribeSignal$)
+    ).subscribe(data => {
+      console.log(data);
+      this.snackBar.open(`Podatki za dan ${forDay} so shranjeni.`, '', {
+        duration: 3000
+      });
+      // this.daysForm.get('days').at(index).patchValue({...data});
+    });
+  }
 
   onSubmit(): void {
     const { value, valid } = this.daysForm.get('days') as FormArray;
@@ -161,7 +191,13 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
     if (valid) {
       const sendToBackend = value.filter(item => item.workplace_id !== '' && item.hours !== '');
       if (sendToBackend.length > 0) {
-        this.tcService.postDays(sendToBackend).subscribe(data => console.log(data));
+        this.tcService.postDays(sendToBackend).pipe(
+          takeUntil(this.unsubscribeSignal$)
+        ).subscribe(data => {
+          console.log(data)
+          // todo: patch values
+          this.snackBar.open('Podatki za celotni teden so bili shranjeni.');
+        });
       }
     }
   }

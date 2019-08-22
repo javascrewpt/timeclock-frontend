@@ -1,5 +1,5 @@
 <div class="date-navigation">
-    <button mat-raised-button color="primary" (click)="onClick(directions.BACK)">Prejšnji</button>
-    {{from}} - {{to}}
-    <button mat-raised-button color="primary" (click)="onClick(directions.FORTH)">Naslednji</button>
+    <button mat-icon-button color="primary" > <mat-icon (click)="onClick(directions.BACK)">arrow_back_ios</mat-icon> </button>
+    <span body-1>{{from}} - {{to}}</span>
+    <button mat-icon-button color="primary" (click)="onClick(directions.FORTH)" [disabled]="outOfBounds"> <mat-icon>arrow_forward_ios</mat-icon> </button>
 </div>
