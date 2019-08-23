@@ -194,7 +194,7 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
         this.tcService.postDays(sendToBackend).pipe(
           takeUntil(this.unsubscribeSignal$)
         ).subscribe(data => {
-          console.log(data)
+          console.log(data);
           // todo: patch values
           this.snackBar.open('Podatki za celotni teden so bili shranjeni.');
         });

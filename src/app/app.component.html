@@ -6,8 +6,14 @@
     <span class="example-fill-remaining-space"></span>
     <span *ngIf="userService.Status | async as userInfo">
       <span *ngIf="userInfo.logged">
-        Zdravo, {{userInfo.user.name}}
-        <button mat-raised-button (click)="onLogout()">Odjava</button>
+        <mat-menu #appMenu="matMenu">
+          <button mat-menu-item>Zdravo, {{userInfo.user.name}}</button>
+          <button mat-menu-item (click)="onLogout()">Odjava</button>
+        </mat-menu>
+
+        <button mat-icon-button [matMenuTriggerFor]="appMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
       </span>
     </span>
   </mat-toolbar>

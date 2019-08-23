@@ -53,7 +53,6 @@ export class UserService {
 
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.url}/auth/login`, { email, password }).pipe(
-
       switchMap(response => {
         if (response && response.data) {
           localStorage.setItem('token', response.data);
@@ -68,10 +67,7 @@ export class UserService {
 
   logout(): Observable<boolean> {
     localStorage.removeItem('token');
-    this.status$.next({
-      logged: false,
-      user: null
-    });
+    this.status$.next(null);
     return of(true);
   }
 

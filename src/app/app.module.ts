@@ -12,6 +12,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -40,6 +41,7 @@ import { TimeclockNavigationComponent } from './timeclock-navigation/timeclock-n
     MatGridListModule,
     MatInputModule,
     MatIconModule,
+    MatMenuModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
