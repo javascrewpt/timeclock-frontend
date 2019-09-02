@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { catchError } from 'rxjs/operators';
+import { catchError, take } from 'rxjs/operators';
+import { UserService } from './user.service';
 
 // https://medium.com/front-end-weekly/angular-how-to-implement-conditional-custom-validation-1ec14b0feb45
 @Injectable({
@@ -10,7 +11,7 @@ import { catchError } from 'rxjs/operators';
 })
 export class AuthenticationInterceptor implements HttpInterceptor {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private userService: UserService) { }
 
   /*
 elvir@bosna.ba
@@ -29,6 +30,9 @@ foo13
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 && this.router.url !== '/') {
+          if (authToken) {
+            localStorage.removeItem('token');
+          }
           this.router.navigate(['']);
           return throwError(error);
         }

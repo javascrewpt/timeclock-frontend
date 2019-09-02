@@ -9,6 +9,9 @@ export class AuthService implements CanActivate {
   constructor(private router: Router) { }
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+
+    // console.log(next.params.week);
+
     if (state.url === '/' && localStorage.getItem('token')) {
       this.router.navigate(['casovnice']);
       return;

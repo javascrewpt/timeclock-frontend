@@ -171,32 +171,70 @@ export class TimeclockCrudComponent implements OnInit, OnDestroy {
     this.edit.splice(index, 1);
   }
 
+  delete(index: number) {
+    if (confirm(`Želiš izbrisati zapis?`)) {
+      const day = this.daysForm.get('days').at(index).value;
+
+      this.tcService.deleteDay(day.id).pipe(
+        takeUntil(this.unsubscribeSignal$)
+      ).subscribe(response => {
+        console.log(response, day.id, index);
+      });
+    }
+  }
+
   saveOne(index: number) {
     const selectedDay = this.daysForm.get('days').at(index);
     const forDay = moment(selectedDay.value.date, 'YYYY-MM-DD').format('DD. MM. YYYY');
+    // check if dirty!
     this.tcService.postDays([selectedDay.value]).pipe(
       takeUntil(this.unsubscribeSignal$)
     ).subscribe(data => {
-      console.log(data);
+      const day = data[0] as any;
+      this.daysForm.get('days').at(index).patchValue({
+        id: day.id,
+        workplace_id: day.workplace_id,
+        date: day.date,
+        hours: day.hours_formated,
+      });
       this.snackBar.open(`Podatki za dan ${forDay} so shranjeni.`, '', {
         duration: 3000
       });
-      // this.daysForm.get('days').at(index).patchValue({...data});
+      this.edit[index] = null;
     });
   }
 
   onSubmit(): void {
-    const { value, valid } = this.daysForm.get('days') as FormArray;
+    const { valid } = this.daysForm.get('days') as FormArray;
 
     if (valid) {
-      const sendToBackend = value.filter(item => item.workplace_id !== '' && item.hours !== '');
-      if (sendToBackend.length > 0) {
-        this.tcService.postDays(sendToBackend).pipe(
+      const insertedDays = [];
+      for (const [index, day] of (this.daysForm.get('days') as FormArray).controls.entries()) {
+        const { value, dirty } = day;
+        if (dirty) {
+          insertedDays.push({ index, data: value });
+        }
+      }
+
+      if (insertedDays.length > 0) {
+        const daysToSave = insertedDays.map(item => item.data);
+        this.tcService.postDays(daysToSave).pipe(
           takeUntil(this.unsubscribeSignal$)
         ).subscribe(data => {
-          console.log(data);
-          // todo: patch values
-          this.snackBar.open('Podatki za celotni teden so bili shranjeni.');
+          const patchData = data.map((item: any) => ({
+            id: item.id,
+            workplace_id: item.workplace_id,
+            date: moment(item.date).format('YYYY-MM-DD'),
+            hours: item.hours_formated,
+          }));
+
+          for (const day of insertedDays) {
+            this.daysForm.get('days').at(day.index).patchValue(patchData.find(item => item.date === day.data.date));
+          }
+
+          this.snackBar.open('Podatki za celotni teden so bili shranjeni.', undefined, {
+            duration: 3000
+          });
         });
       }
     }

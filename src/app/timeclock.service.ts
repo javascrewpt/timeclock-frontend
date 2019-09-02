@@ -50,7 +50,16 @@ primer za dodajanje
   postDays(days: Day[]): Observable<Day[]> {
     return this.http.post<any>(`${this.url}/timeclock/add`, days).pipe(
       tap(data => console.log(data)),
+      map(response => response.data),
       catchError(this.handleError('post all', []))
+    );
+  }
+
+  // timeclock/{id}/remove
+  deleteDay(id: number): Observable<any> {
+    return this.http.get(`${this.url}/timeclock/${id}/remove`).pipe(
+      tap(result => console.log(result)),
+      catchError(this.handleError('Delete one', {}))
     );
   }
 }

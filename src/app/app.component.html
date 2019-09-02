@@ -7,7 +7,7 @@
     <span *ngIf="userService.Status | async as userInfo">
       <span *ngIf="userInfo.logged">
         <mat-menu #appMenu="matMenu">
-          <button mat-menu-item>Zdravo, {{userInfo.user.name}}</button>
+          <button mat-menu-item>{{userInfo.user.name}}</button>
           <button mat-menu-item (click)="onLogout()">Odjava</button>
         </mat-menu>
 
